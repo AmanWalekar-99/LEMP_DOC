@@ -2,7 +2,7 @@
 
 #Check for docker and docker-compose if not present then install
 
-docker --version >> /dev/null
+docker --version &>> /dev/null
 if [ $? -eq 0 ]
 then
   echo "Docker is installed"
