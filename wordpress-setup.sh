@@ -114,7 +114,7 @@ services:
       - wordpress
     image: nginx:latest
     ports:
-      - "8081:80"
+      - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     restart: always
@@ -143,7 +143,7 @@ echo "created"
 
 # prompting user to open site in browser
 echo "Site is up and healthy. Open $SITE_NAME in any browser to view it."
-echo "Or type http://localhost:8081"
+echo "Or type http://localhost:80"
 
 #Adding subcommand to enable/disable the site (stopping/starting the containers)
 # Check if subcommand is provided
