@@ -1,17 +1,19 @@
 #!/bin/bash
 
 #Check for docker and docker-compose if not present then install
+
 docker --version >> /dev/null
 if [ $? -eq 0 ]
 then
   echo "Docker is installed"
 else
-  sudo apt-get update
+  echo "Docker is not present... Installing Docker"
+  sudo apt-get update &>> /dev/null
   sudo apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-  sudo apt-get update
-  sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+  sudo apt-get update $>> /dev/null
+  sudo apt-get install -y docker-ce docker-ce-cli containerd.io &>> /dev/null
 fi
 #check if docker compose is installed
 
@@ -20,7 +22,7 @@ if [ $? -eq 0 ]
 then
   echo "Docker compose is installed"
 else
-  apt-get install docker-compose -y
+  apt-get install docker-compose -y &>> /dev/null
 fi
 
 
@@ -43,88 +45,91 @@ echo "New wordpress site creating with name ${SITE_NAME}"
 mkdir "${SITE_NAME}"
 cd "${SITE_NAME}"
 
-#release port
-fuser -k 8085/tcp
-
 #Creating docker compose and nginx config file
 
-echo "Creating nginx config file in conf.d directory"
-mkdir conf.d
-cd conf.d
+echo "Creating nginx config file in directory"
 
 # adding Configuraation to config file
 cat > nginx.conf << EOF
-server {
-  listen 80;
-  listen [::]:80;
-  server_name localhost;
+worker_processes 1;
 
-  root /var/www/html;
+events { worker_connections 1024; }
 
-  access_log off;
+http {
 
-  index index.php;
+    sendfile on;
 
-  server_tokens off;
+    upstream wordpress {
+        server wordpress:80;
+    }
 
-  location / {
-    try_files $uri $uri/ /index.php?$args;
-  }
+    server {
+        listen 80;
+        server_name localhost;
 
-  location ~ \.php$ {
-    fastcgi_split_path_info ^(.+\.php)(/.+)$;
-    fastcgi_pass wordpress-fpm:9000;
-    fastcgi_index index.php;
-    include fastcgi_params;
-    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-    fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-  }
-
+        location / {
+            proxy_pass http://wordpress;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+    }
 }
+
 EOF
 echo "Config file has been created"
 cd ..
 
 #Creating docker compose file
 cat > docker-compose.yml << EOF
-version: "3.7"
-services:
+version: '3'
 
+services:
   db:
-    image: mariadb:10
-    container_name: wp-db
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
     environment:
+      MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: wp-db
       MYSQL_USER: wp-user
       MYSQL_PASSWORD: wp-pass
-      MYSQL_ROOT_PASSWORD: password
 
-  wordpress-fpm:
-    image: wordpress:latest
-    container_name: wp-fpm
-    links:
+  wordpress:
+    depends_on:
       - db
-    volumes:
-      - wp_files:/var/www/html
+    image: wordpress:latest
+    ports:
+      - "8000:80"
+    restart: always
     environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_NAME: wp-db
+      WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: wp-user
       WORDPRESS_DB_PASSWORD: wp-pass
+      WORDPRESS_DB_NAME: wp-db
 
   nginx:
-    image: nginx:alpine
-    container_name: wp-nginx
     depends_on:
-      - wordpress-fpm
+      - wordpress
+    image: nginx:latest
     ports:
-      - 8085:80
+      - "8081:80"
     volumes:
-      - ./conf.d:/etc/nginx/conf.d
-      - wp_files:/var/www/html
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    restart: always
+
+  php:
+    depends_on:
+      - db
+    image: php:7.4-fpm
+    volumes:
+      - ./wordpress:/var/www/html
+    restart: always
 
 volumes:
-  wp_files:
+  db_data:
+
 EOF
 echo "Docker compose file has been created"
 
@@ -133,12 +138,12 @@ echo "127.0.0.1 $SITE_NAME" >> /etc/hosts
 
 #Creating LEMP stack
 echo "running LEMP stack in docker for wordpress"
-docker-compose up -d
+docker-compose up -d &>> /dev/null
 echo "created"
 
 # prompting user to open site in browser
 echo "Site is up and healthy. Open $SITE_NAME in any browser to view it."
-echo "Or type http://localhost:8085"
+echo "Or type http://localhost:8081"
 
 #Adding subcommand to enable/disable the site (stopping/starting the containers)
 # Check if subcommand is provided
