@@ -147,7 +147,7 @@ echo "Or type http://localhost:8081"
 
 #Adding subcommand to enable/disable the site (stopping/starting the containers)
 # Check if subcommand is provided
-if [ $# -eq 1 ]
+if [ $# -eq 2 ]
 then
   if [ $2 == "stop" ]
   then
@@ -163,7 +163,7 @@ then
 fi
 
 #subcommand to delete the site (deleting containers and local files)
-if [ $# -eq 1 ]
+if [ $# -eq 2 ]
 then
   if [ $2 == "delete" ]
   then
