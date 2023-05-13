@@ -78,7 +78,7 @@ http {
 
 EOF
 echo "Config file has been created"
-cd ..
+
 
 #Creating docker compose file
 cat > docker-compose.yml << EOF
