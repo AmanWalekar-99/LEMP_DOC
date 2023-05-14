@@ -9,8 +9,8 @@ then
 else
   echo "Docker is not present... Installing Docker"
   sudo apt-get update &>> /dev/null
-  sudo apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  sudo apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common &>> /dev/null
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - &>> /dev/null
   sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   sudo apt-get update $>> /dev/null
   sudo apt-get install -y docker-ce docker-ce-cli containerd.io &>> /dev/null
@@ -69,9 +69,9 @@ http {
 
         location / {
             proxy_pass http://wordpress;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Host '$host';
+            proxy_set_header X-Real-IP '$remote_addr';
+            proxy_set_header X-Forwarded-For '$proxy_add_x_forwarded_for';
         }
     }
 }
@@ -134,7 +134,7 @@ EOF
 echo "Docker compose file has been created"
 
 #Entry in /etc/hosts file
-echo "127.0.0.1 $SITE_NAME" >> /etc/hosts
+echo "127.0.0.1 ${SITE_NAME}.com" >> /etc/hosts
 
 #Creating LEMP stack
 echo "running LEMP stack in docker for wordpress"
@@ -142,7 +142,7 @@ docker-compose up -d &>> /dev/null
 echo "created"
 
 # prompting user to open site in browser
-echo "Site is up and healthy. Open $SITE_NAME in any browser to view it."
+echo "Site is up and healthy. Open ${SITE_NAME}.com in any browser to view it."
 echo "Or type http://localhost:80"
 
 #Adding subcommand to enable/disable the site (stopping/starting the containers)
@@ -152,12 +152,14 @@ then
   if [ $2 == "stop" ]
   then
     echo "Stopping the site containers"
-    docker-compose stop
+    docker-compose stop &>> /dev/null
+    echo "Container has been stoped"
     exit 0
   elif [ $2 == "start" ]
   then
     echo "Starting the site containers"
-    docker-compose start
+    docker-compose start &>> /dev/null
+    echo "Container has been started"
     exit 0
   fi
 fi
@@ -168,12 +170,15 @@ then
   if [ $2 == "delete" ]
   then
     echo "Deleting the site and containers"
-    docker-compose down -v
+    docker-compose down -v &>> /dev/null
+    echo "Site and Container has been deleted"
 
 #removing hosts entry
     sed -i "/$SITE_NAME/d" /etc/hosts
 
 #removing all local files
-    rm -rf ./
+    cd ..
+    rm -rf $SITE_NAME
+    echo "Local Files has been removed"
   fi
 fi
