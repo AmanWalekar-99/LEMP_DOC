@@ -4,7 +4,7 @@
 
 ### Installation
 #### 1.	Clone the repository:
-    $ git clone https://github.com/AmanWalekar-99/rtcamp_assigment.git
+    $ git clone https://github.com/AmanWalekar-99/LEMP_DOC.git
 
 #### 2.	Change directory to the cloned repository:
      $ cd wordpress-setup
