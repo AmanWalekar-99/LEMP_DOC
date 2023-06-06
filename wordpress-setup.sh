@@ -12,7 +12,7 @@ else
   sudo apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common &>> /dev/null
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - &>> /dev/null
   sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-  sudo apt-get update $>> /dev/null
+  sudo apt-get update &>> /dev/null
   sudo apt-get install -y docker-ce docker-ce-cli containerd.io &>> /dev/null
 fi
 #check if docker compose is installed
