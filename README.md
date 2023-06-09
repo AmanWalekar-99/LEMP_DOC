@@ -4,13 +4,13 @@
 
 ### Installation
 #### 1.	Clone the repository:
-    $ git clone https://github.com/AmanWalekar-99/LEMP_DOC.git
+    git clone https://github.com/AmanWalekar-99/LEMP_DOC.git
 
 #### 2.	Change directory to the cloned repository:
-     $ cd wordpress-setup
+     cd wordpress-setup
 
 #### 3. Make the script executable:
-     $ chmod +x wordpress-setup.sh
+     chmod +x wordpress-setup.sh
 
 ### Usage
 To create a new WordPress site, run the script with the site name as an argument:
@@ -25,16 +25,16 @@ The script also supports the following subcommands:
 #### 1.	Stop 
    To stop the Docker containers for the site, run:
     
-    $ sudo ./wordpress-setup.sh SITE_NAME stop
+    sudo ./wordpress-setup.sh SITE_NAME stop
 
 
 
 #### 2.	Start
    To start the Docker containers for the site, run:
    
-     $ sudo ./wordpress-setup.sh SITE_NAME start
+     sudo ./wordpress-setup.sh SITE_NAME start
 
 #### 3.	Delete
    To delete the site and its associated Docker containers and files, run:
    
-    $ sudo ./wordpress-setup.sh SITE_NAME delete
+    sudo ./wordpress-setup.sh SITE_NAME delete
